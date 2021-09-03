@@ -30,7 +30,6 @@ fn main() {
         Some(s) => s,
         None => panic!("Failed to look up .text section"),
     };
-    // println!("{:?}", text_scn.data);
     let cs = Capstone::new()
         .x86()
         .mode(arch::x86::ArchMode::Mode64)
@@ -43,7 +42,9 @@ fn main() {
         .expect("Failed to disassemble");
     println!("Found {} instructions", insns.len());
     for i in insns.as_ref() {
-        println!("{}", i);
+        if i.id().0 == 62 && i.bytes().len() == 2 {
+            println!("{}", i);
+        }
 
         // let detail: InsnDetail = cs.insn_detail(&i).expect("Failed to get insn detail");
         // let arch_detail: ArchDetail = detail.arch_detail();
