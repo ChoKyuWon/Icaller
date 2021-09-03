@@ -1,5 +1,8 @@
 # Icaller - find LLVM-CFI forward edge gadget
 
+## Usage
+``cargo run <BINARY_PATH>``
+
 ## Plan
 1. Find all indirect call and branch(e.g call rax, jmp rcx) 
 2. Find all CFI instrument code based on 1.
