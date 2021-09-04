@@ -4,7 +4,7 @@
 ``cargo run <BINARY_PATH>``
 
 ## Plan
-- [ ] Find all indirect call and branch(e.g call rax, jmp rcx) 
+- [x] Find all indirect call and branch(e.g call rax, jmp rcx) 
 - [ ] Find all CFI instrument code based on 1.
 - [ ] Find all Jump table and allowed offset.
 - [ ] Get address form jump table and print it
