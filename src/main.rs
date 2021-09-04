@@ -4,7 +4,7 @@ extern crate capstone;
 
 use std::env;
 use std::path::PathBuf;
-use capstone::prelude::*;
+use capstone::{Insn, prelude::*};
 
 fn reg_names(cs: &Capstone, regs: &[RegId]) -> String {
     let names: Vec<String> = regs.iter().map(|&x| cs.reg_name(x).unwrap()).collect();
@@ -17,7 +17,28 @@ fn group_names(cs: &Capstone, regs: &[InsnGroupId]) -> String {
     names.join(", ")
 }
 
+fn print_detail(cs:&Capstone, i:&Insn){
+    let detail: InsnDetail = cs.insn_detail(&i).expect("Failed to get insn detail");
+    let arch_detail: ArchDetail = detail.arch_detail();
+    let ops = arch_detail.operands();
 
+    let output: &[(&str, String)] = &[
+        ("insn id:", format!("{:?}", i.id().0)),
+        ("bytes:", format!("{:?}", i.bytes())),
+        ("read regs:", reg_names(&cs, detail.regs_read())),
+        ("write regs:", reg_names(&cs, detail.regs_write())),
+        ("insn groups:", group_names(&cs, detail.groups())),
+    ];
+
+    for &(ref name, ref message) in output.iter() {
+        println!("{:4}{:12} {}", "", name, message);
+    }
+
+    println!("{:4}operands: {}", "", ops.len());
+    for op in ops {
+        println!("{:8}{:?}", "", op);
+    }
+}
 fn main() {
     let argv: Vec<String> = env::args().collect();
     let path = PathBuf::from(&argv[1]);
@@ -42,29 +63,10 @@ fn main() {
         .expect("Failed to disassemble");
     println!("Found {} instructions", insns.len());
     for i in insns.as_ref() {
-        if i.id().0 == 62 && i.bytes().len() == 2 {
+        if i.bytes().len() == 2 && i.bytes()[0] == 0xFF{
             println!("{}", i);
+            // i.id().0 == 62 => callq
+            // i.id().0 == 172 => jmpq
         }
-
-        // let detail: InsnDetail = cs.insn_detail(&i).expect("Failed to get insn detail");
-        // let arch_detail: ArchDetail = detail.arch_detail();
-        // let ops = arch_detail.operands();
-
-        // let output: &[(&str, String)] = &[
-        //     ("insn id:", format!("{:?}", i.id().0)),
-        //     ("bytes:", format!("{:?}", i.bytes())),
-        //     ("read regs:", reg_names(&cs, detail.regs_read())),
-        //     ("write regs:", reg_names(&cs, detail.regs_write())),
-        //     ("insn groups:", group_names(&cs, detail.groups())),
-        // ];
-
-        // for &(ref name, ref message) in output.iter() {
-        //     println!("{:4}{:12} {}", "", name, message);
-        // }
-
-        // println!("{:4}operands: {}", "", ops.len());
-        // for op in ops {
-        //     println!("{:8}{:?}", "", op);
-        // }
     }
 }
